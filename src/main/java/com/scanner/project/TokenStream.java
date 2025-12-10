@@ -1,3 +1,4 @@
+package com.scanner.project;
 // TokenStream.java
 
 // Implementation of the Scanner for JAY
@@ -267,3 +268,4 @@ public class TokenStream {
 		return isEof;
 	}
 }
+
