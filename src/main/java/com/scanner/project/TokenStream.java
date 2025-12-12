@@ -90,14 +90,17 @@ public class TokenStream {
 			switch (nextChar) {
 			case '<':
 				t.setType("Operator");
-                nextChar = readChar();
-                if (nextChar == '=') {
-                    t.setValue("<=");
-                    nextChar = readChar();
-                } else {
-                    t.setValue("<");
-                }
-                return t;
+				nextChar = readChar();
+				if (nextChar == '=') {
+					t.setValue("<=");
+					nextChar = readChar();
+				} else if (nextChar == '>') { // Add this block
+					t.setValue("<>");
+					nextChar = readChar();
+				} else {
+					t.setValue("<");
+				}
+				return t;
 				
 			case '>':
 				t.setType("Operator");
@@ -277,7 +280,7 @@ public class TokenStream {
 	}
 
 	private boolean isLetter(char c) {
-		return (c >= 'a' && c <= 'z' || c >= 'A' && c <= 'Z');
+		return (c >= 'a' && c <= 'z' || c >= 'A' && c <= 'Z' || c == '_');
 	}
 
 	private boolean isDigit(char c) {
