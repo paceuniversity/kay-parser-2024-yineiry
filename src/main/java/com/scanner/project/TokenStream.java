@@ -159,7 +159,7 @@ public class TokenStream {
 			// now see if this is a keyword
 			if (isKeyword(t.getValue())) {
 				t.setType("Keyword");
-			} else if (t.getValue().equals("true") || t.getValue().equals("false")) {
+			} else if (t.getValue().equals("True") || t.getValue().equals("False")) {
 				t.setType("Literal");
 			}
 			if (isEndOfToken(nextChar)) { // If token is valid, returns.
@@ -246,7 +246,7 @@ public class TokenStream {
 	private boolean isSeparator(char c) {
 		return c == '(' || c == ')' ||
            c == '{' || c == '}' ||
-           c == ';' || c == ',';
+           c == ',' || c == ';';
 	}
 
 	private boolean isOperator(char c) {
@@ -255,7 +255,7 @@ public class TokenStream {
            c == '*' || c == '/' ||
            c == '<' || c == '>' ||
            c == '=' || c == '!' ||
-           c == '&' || c == '|' ;
+           c == '|' || c == '&' ;
 	}
 
 	private boolean isLetter(char c) {
