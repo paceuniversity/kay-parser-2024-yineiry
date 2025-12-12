@@ -32,6 +32,7 @@ public class TokenStream {
 	public TokenStream(String fileName) {
 		try {
 			input = new BufferedReader(new FileReader(fileName));
+			nextChar = readChar();
 		} catch (FileNotFoundException e) {
 			System.out.println("File not found: " + fileName);
 			// System.exit(1); // Removed to allow ScannerDemo to continue
@@ -96,9 +97,7 @@ public class TokenStream {
 				if (nextChar == '=') {
 					t.setValue(t.getValue() + nextChar);
 					nextChar = readChar();
-					return t;
 				}
-				t.setType("Other");
 				return t;
 
 			case '!':
@@ -133,6 +132,15 @@ public class TokenStream {
 					t.setType("Other");
 				}
 				return t;
+			case ':':
+				nextChar = readChar();
+				if (nextChar == '=') {
+					t.setValue(t.getValue() + nextChar); // makes ":="
+					nextChar = readChar();
+					return t;
+				}
+				t.setType("Other");
+				return t;
 
 			default: // all other operators
 				nextChar = readChar();
@@ -159,7 +167,7 @@ public class TokenStream {
 			// now see if this is a keyword
 			if (isKeyword(t.getValue())) {
 				t.setType("Keyword");
-			} else if (t.getValue().equals("True") || t.getValue().equals("False")) {
+			} else if (t.getValue().equals("true") || t.getValue().equals("false")) {
 				t.setType("Literal");
 			}
 			if (isEndOfToken(nextChar)) { // If token is valid, returns.
@@ -216,12 +224,14 @@ public class TokenStream {
 	}
 
 	private boolean isKeyword(String s) {
-    	return s.equals("integer") ||
-           s.equals("main") ||
-           s.equals("bool") ||
-           s.equals("if") ||
+    	return s.equals("bool") ||
            s.equals("else") ||
-           s.equals("while");
+		   s.equals("if") ||
+           s.equals("integer") ||
+           s.equals("main") ||
+		   s.equals("while") ||
+           s.equals("do") ||
+		   s.equals("void");
 	}
 
 	private boolean isWhiteSpace(char c) {
@@ -233,7 +243,7 @@ public class TokenStream {
 	}
 
 	private boolean isEndOfToken(char c) { // Is the value a seperate token?
-		return (isWhiteSpace(nextChar) || isOperator(nextChar) || isSeparator(nextChar) || isEof);
+		return (isWhiteSpace(c) || isOperator(c) || isSeparator(c) || isEof);
 	}
 
 	private void skipWhiteSpace() {
@@ -255,7 +265,8 @@ public class TokenStream {
            c == '*' || c == '/' ||
            c == '<' || c == '>' ||
            c == '=' || c == '!' ||
-           c == '|' || c == '&' ;
+           c == '|' || c == '&' ||
+		   c == ':';
 	}
 
 	private boolean isLetter(char c) {
