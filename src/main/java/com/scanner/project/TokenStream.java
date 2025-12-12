@@ -28,19 +28,16 @@ public class TokenStream {
 
 	public Token nextToken() { 
 		skipWhiteSpace();
-        
-        // --- FIX START: Skip headers ---
+
+        // --- CRITICAL FIX: Skip headers ---
         while (nextChar == '[') {
-            // Consume everything until ']'
             while (nextChar != ']' && !isEof) {
                 nextChar = readChar();
             }
-            // Consume the closing ']'
-            if (!isEof) nextChar = readChar();
-            // Skip any whitespace after the header
+            if (!isEof) nextChar = readChar(); // consume ']'
             skipWhiteSpace();
         }
-        // --- FIX END ---
+        // ----------------------------------------------
 
 		if (isEof) {
 			Token eof = new Token();
@@ -84,7 +81,7 @@ public class TokenStream {
                     t.setValue("<=");
                     nextChar = readChar();
                 } else if (nextChar == '>') { 
-                    t.setValue("<>");
+                    t.setValue("<>"); // Support for <>
                     nextChar = readChar();
                 } else {
                     t.setValue("<");
@@ -181,9 +178,14 @@ public class TokenStream {
 			}
 			if (isKeyword(t.getValue())) {
 				t.setType("Keyword");
-			} else if (t.getValue().equals("true") || t.getValue().equals("false")) {
+			} else if (t.getValue().equalsIgnoreCase("true")) {
+                // CRITICAL FIX for ptest6: Handle "True" and "true"
 				t.setType("Literal");
-			}
+                t.setValue("true"); // Normalize to lowercase for parser
+			} else if (t.getValue().equalsIgnoreCase("false")) {
+                t.setType("Literal");
+                t.setValue("false"); // Normalize to lowercase for parser
+            }
 			return t;
 		}
 
