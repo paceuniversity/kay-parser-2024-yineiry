@@ -1,4 +1,3 @@
-package com.scanner.project;
 // ConcreteSyntax.java
 
 // Implementation of the Recursive Descent Parser algorithm
@@ -9,6 +8,8 @@ package com.scanner.project;
 // This code DOES NOT implement a parser for KAY. You have to complete
 // the code and also make sure it implements a parser for KAY - not something
 // else.
+
+import java.beans.Expression;
 
 public class ConcreteSyntax {
 
@@ -46,11 +47,9 @@ public class ConcreteSyntax {
 
 	public Program program() {
 		// Program --> main '{' Declarations Statements '}'
-		String[] header = { "main", "{" };
 		Program p = new Program();
-		for (int i = 0; i < header.length; i++)
-			// bypass " main { "
-			match(header[i]);
+		match("main");
+		match("{");
 		p.decpart = declarations();
 		p.body = statements();
 		match("}");
@@ -58,10 +57,9 @@ public class ConcreteSyntax {
 	}
 
 	private Declarations declarations() {
-		// TODO TO BE COMPLETED 
 		// Declarations --> { Declaration }*
 		Declarations ds = new Declarations();
-		while (token.getValue().equals("int")
+		while (token.getValue().equals("integer")
 				|| token.getValue().equals("bool")) {
 			declaration(ds);
 		}
@@ -76,15 +74,14 @@ public class ConcreteSyntax {
 	}
 
 	private Type type() {
-		// TODO TO BE COMPLETED
 		// Type --> integer | bool
-		Type t = null;
-		if (token.getValue().equals("int"))
-			t = new Type(token.getValue());
+		Type t;
+		if (token.getValue().equals("integer"))
+			t = new Type("integer");
 		else if (token.getValue().equals("bool"))
-			t = new Type(token.getValue());
+			t = new Type("bool");
 		else
-			throw new RuntimeException(SyntaxError("int | boolean"));
+			throw new RuntimeException(SyntaxError("integer | bool"));
 		token = input.nextToken(); // pass over the type
 		return t;
 	}
@@ -124,15 +121,15 @@ public class ConcreteSyntax {
 			token = input.nextToken();
 			s = statements();
 			match("}");
-		} else if (token.getValue().equals("if")) // IfStatement
+		} else if (token.getValue().equals("if")) {// IfStatement
 			s = ifStatement();
-		else if (token.getValue().equals("while")) {
-			// WhileStatement
+		} else if (token.getValue().equals("while")) {
 			s = whileStatement();
 		} else if (token.getType().equals("Identifier")) { // Assignment
 			s = assignment();
-		} else
+		} else {
 			throw new RuntimeException(SyntaxError("Statement"));
+		}
 		return s;
 	}
 
@@ -151,20 +148,21 @@ public class ConcreteSyntax {
 		if (token.getType().equals("Identifier")) {
 			a.variable = new Variable();
 			a.variable.id = token.getValue();
+
 			token = input.nextToken();
 			match(":=");
 			a.source = expression();
 			match(";");
-		} else
+		} else {
 			throw new RuntimeException(SyntaxError("Identifier"));
+		}
 		return a;
 	}
 
 	private Expression expression() {
 		// Expression --> Conjunction { || Conjunction }*
 		Binary b;
-		Expression e;
-		e = conjunction();
+		Expression e = conjunction();
 		while (token.getValue().equals("||")) {
 			b = new Binary();
 			b.term1 = e;
@@ -179,8 +177,7 @@ public class ConcreteSyntax {
 	private Expression conjunction() {
 		// Conjunction --> Relation { && Relation }*
 		Binary b;
-		Expression e;
-		e = relation();
+		Expression e = relation();
 		while (token.getValue().equals("&&")) {
 			b = new Binary();
 			b.term1 = e;
@@ -195,16 +192,17 @@ public class ConcreteSyntax {
 	private Expression relation() {
 		// Relation --> Addition [ < | <= | > | >= | == | <> ] Addition }*
 		Binary b;
-		Expression e;
-		e = addition();
-		while (token.getValue().equals("<") || token.getValue().equals("<=")
-				|| token.getValue().equals(">=")
-				|| token.getValue().equals("==")
-				|| token.getValue().equals("<>")) {
+		Expression e = addition();
+		while (token.getValue().equals("<") ||
+           token.getValue().equals("<=") ||
+           token.getValue().equals(">") ||
+           token.getValue().equals(">=") ||
+           token.getValue().equals("==") ||
+           token.getValue().equals("!=")) {
 			b = new Binary();
-			b.term1 = e;                
+			b.term1 = e;
 			b.op = new Operator(token.getValue());
-			token = input.nextToken();             
+			token = input.nextToken();
 			b.term2 = addition();
 			e = b;
 		}
@@ -214,8 +212,7 @@ public class ConcreteSyntax {
 	private Expression addition() {
 		// Addition --> Term { [ + | - ] Term }*
 		Binary b;
-		Expression e;
-		e = term();
+		Expression e = term();
 		while (token.getValue().equals("+") || token.getValue().equals("-")) {
 			b = new Binary();
 			b.term1 = e;
@@ -230,8 +227,7 @@ public class ConcreteSyntax {
 	private Expression term() {
 		// Term --> Negation { [ '*' | / ] Negation }*
 		Binary b;
-		Expression e;
-		e = negation();
+		Expression e = negation();
 		while (token.getValue().equals("*") || token.getValue().equals("/")) {
 			b = new Binary();
 			b.term1 = e;
@@ -252,8 +248,7 @@ public class ConcreteSyntax {
 			token = input.nextToken();
 			u.term = factor();
 			return u;
-		} else
-			return factor();
+		} return factor();
 	}
 
 	private Expression factor() {
@@ -280,8 +275,9 @@ public class ConcreteSyntax {
 			token = input.nextToken();
 			e = expression();
 			match(")");
-		} else
+		} else {
 			throw new RuntimeException(SyntaxError("Identifier | Literal | ("));
+		}
 		return e;
 	}
 
