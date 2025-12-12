@@ -10,8 +10,6 @@ package com.scanner.project;
 // the code and also make sure it implements a parser for KAY - not something
 // else.
 
-import java.beans.Expression;
-
 public class ConcreteSyntax {
 
 	// READ THE COMPLETE FILE FIRST
@@ -147,8 +145,8 @@ public class ConcreteSyntax {
 		// Assignment --> Identifier := Expression ;
 		Assignment a = new Assignment();
 		if (token.getType().equals("Identifier")) {
-			a.variable = new Variable();
-			a.variable.id = token.getValue();
+			a.target = new Variable();
+			a.target.id = token.getValue();
 
 			token = input.nextToken();
 			match(":=");
@@ -195,11 +193,12 @@ public class ConcreteSyntax {
 		Binary b;
 		Expression e = addition();
 		while (token.getValue().equals("<") ||
-           token.getValue().equals("<=") ||
-           token.getValue().equals(">") ||
-           token.getValue().equals(">=") ||
-           token.getValue().equals("==") ||
-           token.getValue().equals("!=")) {
+			token.getValue().equals("<=") ||
+			token.getValue().equals(">") ||
+			token.getValue().equals(">=") ||
+			token.getValue().equals("==") ||
+			token.getValue().equals("!=") || 
+			token.getValue().equals("<>")) {
 			b = new Binary();
 			b.term1 = e;
 			b.op = new Operator(token.getValue());
@@ -241,15 +240,16 @@ public class ConcreteSyntax {
 	}
 
 	private Expression negation() {
-		// Negation --> { ! }opt Factor
+    // Negation --> { ! }opt Factor
 		Unary u;
 		if (token.getValue().equals("!")) {
 			u = new Unary();
 			u.op = new Operator(token.getValue());
 			token = input.nextToken();
-			u.term = factor();
+			u.term = negation(); // CHANGE THIS: call negation() instead of factor()
 			return u;
-		} return factor();
+		}
+		return factor();
 	}
 
 	private Expression factor() {
