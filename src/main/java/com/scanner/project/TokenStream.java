@@ -32,7 +32,6 @@ public class TokenStream {
 	public TokenStream(String fileName) {
 		try {
 			input = new BufferedReader(new FileReader(fileName));
-			nextChar = readChar();
 		} catch (FileNotFoundException e) {
 			System.out.println("File not found: " + fileName);
 			// System.exit(1); // Removed to allow ScannerDemo to continue
@@ -49,13 +48,7 @@ public class TokenStream {
 
 		// First check for whitespaces and bypass them
 		skipWhiteSpace();
-		if (isEof) {
-			Token eof = new Token();
-			eof.setType("EOF");
-			eof.setValue("");
-			return eof;
-		}
-
+		
 		// Then check for a comment, and bypass it
 		// but remember that / may also be a division operator.
 		while (nextChar == '/') {
@@ -97,13 +90,14 @@ public class TokenStream {
 					nextChar = readChar();
 				}
 				return t;
-
 			case '=':
 				nextChar = readChar();
 				if (nextChar == '=') {
 					t.setValue(t.getValue() + nextChar);
 					nextChar = readChar();
+					return t;
 				}
+				t.setType("Other");
 				return t;
 
 			case '!':
@@ -114,7 +108,16 @@ public class TokenStream {
 					return t;
 				}
 				return t;
-
+			case ':':
+				nextChar = readChar();
+				if (nextChar == '=') {
+					t.setValue(t.getValue() + nextChar); // makes ":="
+					nextChar = readChar();
+					return t;
+				} else {
+					t.setType("Other");
+				}
+				return t;
 			case '|':
 				// Look for ||
 				nextChar = readChar();
@@ -137,15 +140,6 @@ public class TokenStream {
 				} else {
 					t.setType("Other");
 				}
-				return t;
-			case ':':
-				nextChar = readChar();
-				if (nextChar == '=') {
-					t.setValue(t.getValue() + nextChar); // makes ":="
-					nextChar = readChar();
-					return t;
-				}
-				t.setType("Other");
 				return t;
 
 			default: // all other operators
@@ -195,6 +189,10 @@ public class TokenStream {
 		}
 
 		t.setType("Other");
+
+		if (isEof) {
+			return t;
+		}
 		
 		// Makes sure that the whole unknown token (Type: Other) is printed.
 		while (!isEndOfToken(nextChar) && !isEof) {
@@ -231,9 +229,7 @@ public class TokenStream {
 		   s.equals("if") ||
            s.equals("integer") ||
            s.equals("main") ||
-		   s.equals("while") ||
-           s.equals("do") ||
-		   s.equals("void");
+		   s.equals("while");
 	}
 
 	private boolean isWhiteSpace(char c) {
@@ -245,7 +241,7 @@ public class TokenStream {
 	}
 
 	private boolean isEndOfToken(char c) { // Is the value a seperate token?
-		return (isWhiteSpace(c) || isOperator(c) || isSeparator(c) || isEof);
+		return (isWhiteSpace(nextChar) || isOperator(nextChar) || isSeparator(nextChar) || isEof);
 	}
 
 	private void skipWhiteSpace() {
