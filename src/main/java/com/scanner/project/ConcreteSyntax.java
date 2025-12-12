@@ -1,3 +1,4 @@
+package com.scanner.project;
 // ConcreteSyntax.java
 
 // Implementation of the Recursive Descent Parser algorithm
