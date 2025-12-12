@@ -1,12 +1,6 @@
 package com.scanner.project;
 // TokenStream.java
 
-// Implementation of the Scanner for JAY
-
-// This code DOES NOT implement a scanner for JAY yet. You have to complete
-// the code and also make sure it implements a scanner for JAY - not something
-// else.
-
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -14,54 +8,52 @@ import java.io.IOException;
 
 public class TokenStream {
 
-	// READ THE COMPLETE FILE FIRST
-	// You will need to adapt it to KAY, NOT JAY
-
-	// Instance variables 
-	private boolean isEof = false; // is end of file
-	private char nextChar = ' '; // next character in input stream
+	private boolean isEof = false;
+	private char nextChar = ' ';
 	private BufferedReader input;
 
-	// This function was added to make the demo file work
 	public boolean isEoFile() {
 		return isEof;
 	}
 
-	// Constructor
-	// Pass a filename for the program text as a source for the TokenStream.
 	public TokenStream(String fileName) {
 		try {
 			input = new BufferedReader(new FileReader(fileName));
 			nextChar = readChar();
 		} catch (FileNotFoundException e) {
 			System.out.println("File not found: " + fileName);
-			// System.exit(1); // Removed to allow ScannerDemo to continue
-			// running after the input file is not found.
 			isEof = true;
 		}
 	}
 
-	public Token nextToken() { // Main function of the scanner
+	public Token nextToken() { 
 		skipWhiteSpace();
+        
+        // --- FIX START: Skip headers ---
+        while (nextChar == '[') {
+            // Consume everything until ']'
+            while (nextChar != ']' && !isEof) {
+                nextChar = readChar();
+            }
+            // Consume the closing ']'
+            if (!isEof) nextChar = readChar();
+            // Skip any whitespace after the header
+            skipWhiteSpace();
+        }
+        // --- FIX END ---
+
 		if (isEof) {
 			Token eof = new Token();
 			eof.setType("EOF");
 			eof.setValue("");
 			return eof;
     	}
-		// Return next token type and value.
 		Token t = new Token();
-		t.setType("Other"); // For now it is Other
+		t.setType("Other");
 		t.setValue("");
 
-		// First check for whitespaces and bypass them
-		
-
-		// Then check for a comment, and bypass it
-		// but remember that / may also be a division operator.
+		// Check for comments
 		while (nextChar == '/') {
-			// Changed if to while to avoid the 2nd line being printed when
-			// there are two comment lines in a row.
 			nextChar = readChar();
 			if (nextChar == '/') {
 				while (!isEndOfLine(nextChar) && !isEof) {
@@ -75,32 +67,29 @@ public class TokenStream {
 					return eof;
 				}
 			} else {
-				// A slash followed by anything else must be an operator.
 				t.setValue("/");
 				t.setType("Operator");
 				return t;
 			}
 		}
 
-		// Then check for an operator; this part of the code should recover 2-character
-		// operators as well as 1-character ones.
 		if (isOperator(nextChar)) {
 			t.setType("Operator");
 			t.setValue("" + nextChar);
 			switch (nextChar) {
 			case '<':
 				t.setType("Operator");
-				nextChar = readChar();
-				if (nextChar == '=') {
-					t.setValue("<=");
-					nextChar = readChar();
-				} else if (nextChar == '>') { // Add this block
-					t.setValue("<>");
-					nextChar = readChar();
-				} else {
-					t.setValue("<");
-				}
-				return t;
+                nextChar = readChar();
+                if (nextChar == '=') {
+                    t.setValue("<=");
+                    nextChar = readChar();
+                } else if (nextChar == '>') { 
+                    t.setValue("<>");
+                    nextChar = readChar();
+                } else {
+                    t.setValue("<");
+                }
+                return t;
 				
 			case '>':
 				t.setType("Operator");
@@ -147,7 +136,6 @@ public class TokenStream {
                 t.setValue(":");
                 return t;	
 			case '|':
-				// Look for ||
 				nextChar = readChar();
 				if (nextChar == '|') {
                     t.setType("Operator");
@@ -171,14 +159,13 @@ public class TokenStream {
                 t.setValue("&");
                 return t;
 
-			default: // all other operators
+			default: 
 				t.setType("Operator");
 				nextChar = readChar();
 				return t;
 			}
 		}
 
-		// Then check for a separator
 		if (isSeparator(nextChar)) {
 			t.setType("Separator");
 			t.setValue("" + nextChar);
@@ -186,15 +173,12 @@ public class TokenStream {
 			return t;
 		}
 
-		// Then check for an identifier, keyword, or literal.
 		if (isLetter(nextChar)) {
-			// Set to an identifier
 			t.setType("Identifier");
 			while (isLetter(nextChar) || isDigit(nextChar)) {
 				t.setValue(t.getValue() + nextChar);
 				nextChar = readChar();
 			}
-			// now see if this is a keyword
 			if (isKeyword(t.getValue())) {
 				t.setType("Keyword");
 			} else if (t.getValue().equals("true") || t.getValue().equals("false")) {
@@ -203,14 +187,12 @@ public class TokenStream {
 			return t;
 		}
 
-		if (isDigit(nextChar)) { // check for integer literals
+		if (isDigit(nextChar)) { 
 			t.setType("Literal");
 			while (isDigit(nextChar)) {
 				t.setValue(t.getValue() + nextChar);
 				nextChar = readChar();
 			}
-			// An Integer-Literal is to be only followed by a space,
-			// an operator, or a separator.
 			return t; 
 		}
 
@@ -253,12 +235,11 @@ public class TokenStream {
 		return (c == '\r' || c == '\n' || c == '\f');
 	}
 
-	private boolean isEndOfToken(char c) { // Is the value a seperate token?
+	private boolean isEndOfToken(char c) {
 		return (isWhiteSpace(c) || isOperator(c) || isSeparator(c) || isEof);
 	}
 
 	private void skipWhiteSpace() {
-		// check for whitespaces, and bypass them
 		while (!isEof && isWhiteSpace(nextChar)) {
 			nextChar = readChar();
 		}
