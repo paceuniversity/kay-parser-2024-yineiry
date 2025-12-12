@@ -3,8 +3,8 @@ package com.scanner.project;
 
 // Implementation of the Scanner for JAY
 
-// This code DOES NOT implement a scanner for JAY yet. You have to complete
-// the code and also make sure it implements a scanner for JAY - not something
+// This code DOES NOT implement a scanner for KAY yet. You have to complete
+// the code and also make sure it implements a scanner for KAY - not something
 // else.
 
 import java.io.BufferedReader;
@@ -96,7 +96,9 @@ public class TokenStream {
 				if (nextChar == '=') {
 					t.setValue(t.getValue() + nextChar);
 					nextChar = readChar();
+					return t;
 				}
+				t.setType("Other");
 				return t;
 
 			case '!':
@@ -104,6 +106,7 @@ public class TokenStream {
 				if (nextChar == '=') {
 					t.setValue(t.getValue() + nextChar);
 					nextChar = readChar();
+					return t;
 				}
 				return t;
 
@@ -129,7 +132,6 @@ public class TokenStream {
 				} else {
 					t.setType("Other");
 				}
-
 				return t;
 
 			default: // all other operators
@@ -185,11 +187,11 @@ public class TokenStream {
 		}
 
 		// Makes sure that the whole unknown token (Type: Other) is printed.
-		while (!isEndOfToken(nextChar)) {
+		while (!isEndOfToken(nextChar) && !isEof) {
 			t.setValue(t.getValue() + nextChar);
 			nextChar = readChar();
 		}
-		
+
 		// Finally check for whitespaces and bypass them
 		skipWhiteSpace();
 
@@ -214,9 +216,9 @@ public class TokenStream {
 	}
 
 	private boolean isKeyword(String s) {
-    	return s.equals("int") ||
-           s.equals("void") ||
-           s.equals("return") ||
+    	return s.equals("integer") ||
+           s.equals("main") ||
+           s.equals("bool") ||
            s.equals("if") ||
            s.equals("else") ||
            s.equals("while");
@@ -268,5 +270,3 @@ public class TokenStream {
 		return isEof;
 	}
 }
-
-
