@@ -49,6 +49,12 @@ public class TokenStream {
 
 		// First check for whitespaces and bypass them
 		skipWhiteSpace();
+		if (isEof) {
+			Token eof = new Token();
+			eof.setType("EOF");
+			eof.setValue("");
+			return eof;
+		}
 
 		// Then check for a comment, and bypass it
 		// but remember that / may also be a division operator.
@@ -190,10 +196,6 @@ public class TokenStream {
 
 		t.setType("Other");
 		
-		if (isEof) {
-			return t;
-		}
-
 		// Makes sure that the whole unknown token (Type: Other) is printed.
 		while (!isEndOfToken(nextChar) && !isEof) {
 			t.setValue(t.getValue() + nextChar);
